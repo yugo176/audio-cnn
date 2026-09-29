@@ -4,6 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
@@ -123,3 +124,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes scan {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(300%); }
+}
+.scan-bar { animation: scan 1.2s ease-in-out infinite; }

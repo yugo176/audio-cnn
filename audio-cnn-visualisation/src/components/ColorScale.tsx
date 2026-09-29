@@ -1,29 +1,23 @@
 const ColorScale = ({
-  width = 200,
-  height = 16,
-  min = -1,
-  max = 1,
+  gradient,
+  min,
+  max,
+  label,
 }: {
-  width?: number;
-  height?: number;
-  min?: number;
-  max?: number;
-}) => {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="text-xs text-stone-500">{min}</span>
-      <div
-        className="rounded border border-stone-500"
-        style={{
-          width: `${width}px`,
-          height: `${height}px`,
-          background:
-            "linear-gradient(to right, rgb(255, 128, 51), rgb(255, 255, 255), rgb(51,128, 255))",
-        }}
-      />
-      <span className="text-xs text-stone-500">{max}</span>
-    </div>
-  );
-};
+  gradient: string;
+  min: string;
+  max: string;
+  label?: string;
+}) => (
+  <div className="flex items-center gap-3 font-mono text-[11px] text-zinc-500">
+    {label && <span className="uppercase tracking-widest">{label}</span>}
+    <span>{min}</span>
+    <div
+      className="h-2.5 w-32 rounded-full ring-1 ring-white/10 sm:w-40"
+      style={{ background: gradient }}
+    />
+    <span>{max}</span>
+  </div>
+);
 
 export default ColorScale;

@@ -50,7 +50,7 @@ class InferenceRequest(BaseModel):
     audio_data: str
 
 
-@app.cls(image=image, gpu="A10G", volumes={"/models": model_volume}, scaledown_window=15)
+@app.cls(image=image, gpu="T4", volumes={"/models": model_volume}, scaledown_window=15)
 class AudioClassifier:
     @modal.enter()
     def load_model(self):

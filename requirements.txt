@@ -1,0 +1,12 @@
+pandas
+torchaudio
+torch
+tqdm
+numpy
+tensorboard
+fastapi
+librosa
+pydantic
+soundfile
+modal
+requests

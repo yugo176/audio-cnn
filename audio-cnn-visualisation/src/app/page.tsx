@@ -6,6 +6,7 @@ import ColorScale from "~/components/ColorScale";
 import DropZone from "~/components/DropZone";
 import FeatureMap from "~/components/FeatureMap";
 import Hero from "~/components/Hero";
+import Recorder from "~/components/Recorder";
 import Waveform from "~/components/Waveform";
 import { env } from "~/env";
 import { getClassInfo } from "~/lib/classes";
@@ -223,6 +224,14 @@ export default function HomePage() {
         <Hero />
 
         <DropZone onFile={handleFile} isLoading={isLoading} fileName={fileName} />
+
+        <div className="my-5 flex items-center gap-4 font-mono text-[11px] uppercase tracking-widest text-zinc-600">
+          <span className="h-px flex-1 bg-white/10" />
+          ou
+          <span className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <Recorder onRecorded={handleFile} disabled={isLoading} />
 
         {isLoading && (
           <p className="mt-3 text-center font-mono text-xs text-zinc-500">

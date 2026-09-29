@@ -50,7 +50,7 @@ class InferenceRequest(BaseModel):
     audio_data: str
 
 
-@app.cls(image=image, gpu="T4", volumes={"/models": model_volume}, scaledown_window=15)
+@app.cls(image=image, cpu=2.0, memory=4096, volumes={"/models": model_volume}, scaledown_window=15)
 class AudioClassifier:
     @modal.enter()
     def load_model(self):
@@ -158,8 +158,8 @@ def main():
     if waveform_info:
         values = waveform_info.get("values", {})
         print(f"First 10 values: {[round(v, 4) for v in values[:10]]}...")
-        print(f"Duration: {waveform_info.get("duration", 0)}")
+        print(f"Duration: {waveform_info.get('duration', 0)}")
 
     print("Top predictions:")
     for pred in result.get("predictions", []):
-        print(f"  -{pred["class"]} {pred["confidence"]:0.2%}")
+        print(f"  -{pred['class']} {pred['confidence']:0.2%}")

@@ -130,3 +130,12 @@
   to { transform: translateX(300%); }
 }
 .scan-bar { animation: scan 1.2s ease-in-out infinite; }
+
+@keyframes eq {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.35); }
+}
+.eq-bar { transform-origin: bottom; animation: eq 1.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .eq-bar, .scan-bar { animation: none; }
+}

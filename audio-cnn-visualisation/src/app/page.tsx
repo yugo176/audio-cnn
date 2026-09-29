@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import ColorScale from "~/components/ColorScale";
 import DropZone from "~/components/DropZone";
 import FeatureMap from "~/components/FeatureMap";
+import Hero from "~/components/Hero";
 import Waveform from "~/components/Waveform";
 import { env } from "~/env";
 import { getClassInfo } from "~/lib/classes";
@@ -218,6 +219,8 @@ export default function HomePage() {
             ))}
           </div>
         </header>
+
+        <Hero />
 
         <DropZone onFile={handleFile} isLoading={isLoading} fileName={fileName} />
 

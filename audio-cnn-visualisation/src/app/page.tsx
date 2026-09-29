@@ -259,7 +259,7 @@ export default function HomePage() {
           <div ref={resultsRef} className="mt-8 scroll-mt-6 space-y-6">
             <div className="grid gap-6 lg:grid-cols-5">
               {/* Prédictions */}
-              <Panel title="Prédictions" subtitle="Top 3 · softmax" className="lg:col-span-2">
+              <Panel title="Prédictions" subtitle="Top 5 · softmax" className="lg:col-span-2">
                 {top && (
                   <div className="mb-5 flex items-center gap-4 rounded-xl bg-gradient-to-r from-cyan-400/15 to-fuchsia-500/10 p-4 ring-1 ring-cyan-400/20">
                     <span className="text-5xl leading-none">
@@ -276,7 +276,7 @@ export default function HomePage() {
                   </div>
                 )}
                 <ol className="space-y-3">
-                  {vizData.predictions.slice(0, 3).map((pred, i) => {
+                  {vizData.predictions.slice(0, 5).map((pred, i) => {
                     const { emoji, label } = getClassInfo(pred.class);
                     return (
                       <li key={pred.class}>

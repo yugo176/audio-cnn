@@ -93,10 +93,10 @@ class AudioClassifier:
 
             output = torch.nan_to_num(output)
             probabilities = torch.softmax(output, dim=1)
-            top3_probs, top3_indicies = torch.topk(probabilities[0], 3)
+            top5_probs, top5_indices = torch.topk(probabilities[0], 5)
 
             predictions = [{"class": self.classes[idx.item()], "confidence": prob.item()}
-                           for prob, idx in zip(top3_probs, top3_indicies)]
+                           for prob, idx in zip(top5_probs, top5_indices)]
 
             viz_data = {}
             for name, tensor in feature_maps.items():

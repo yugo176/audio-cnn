@@ -121,6 +121,16 @@ export default function HomePage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  // Défilement vers les résultats dès qu'ils arrivent
+  useEffect(() => {
+    if (!vizData) return;
+    // Défilement instantané si l'onglet est en arrière-plan (le mode smooth y est ignoré)
+    const instant =
+      document.hidden || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    resultsRef.current?.scrollIntoView({ behavior: instant ? "auto" : "smooth", block: "start" });
+  }, [vizData]);
 
   useEffect(() => {
     return () => {
@@ -246,7 +256,7 @@ export default function HomePage() {
         )}
 
         {vizData && (
-          <div className="mt-8 space-y-6">
+          <div ref={resultsRef} className="mt-8 scroll-mt-6 space-y-6">
             <div className="grid gap-6 lg:grid-cols-5">
               {/* Prédictions */}
               <Panel title="Prédictions" subtitle="Top 3 · softmax" className="lg:col-span-2">

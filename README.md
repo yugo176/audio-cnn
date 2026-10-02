@@ -32,6 +32,7 @@ Son (WAV, MP3, micro…)  →  Spectrogramme Mel  →  ResNet-34  →  Top 5 des
 ├── train_colab.ipynb         # Entraînement alternatif sur Google Colab (GPU T4 gratuit)
 ├── main.py                   # API d'inférence déployée sur Modal
 ├── requirements.txt
+├── theory.excalidraw         # Schéma théorique (à ouvrir sur excalidraw.com)
 └── audio-cnn-visualisation/  # Frontend Next.js
 ```
 

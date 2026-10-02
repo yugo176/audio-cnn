@@ -9,6 +9,7 @@ import Hero from "~/components/Hero";
 import Recorder from "~/components/Recorder";
 import Waveform from "~/components/Waveform";
 import { env } from "~/env";
+import { UserFacingError, apiErrorMessage, prepareAudio } from "~/lib/audio";
 import { getClassInfo } from "~/lib/classes";
 import { DIVERGING_GRADIENT, SEQUENTIAL_GRADIENT } from "~/lib/colors";
 
@@ -62,7 +63,7 @@ function splitLayers(visualization: VisualizationData) {
   return { main, internals };
 }
 
-const readAsBase64 = (file: File) =>
+const readAsBase64 = (file: Blob) =>
   new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve((reader.result as string).split(",")[1] ?? "");
@@ -157,10 +158,13 @@ export default function HomePage() {
     setVizData(null);
     setIsPlaying(false);
     setCurrentTime(0);
-    setAudioUrl(URL.createObjectURL(file));
+    setAudioUrl(undefined);
 
     try {
-      const audioData = await readAsBase64(file);
+      const wav = await prepareAudio(file);
+      // Le lecteur joue exactement l'extrait analysé (converti et coupé)
+      setAudioUrl(URL.createObjectURL(wav));
+      const audioData = await readAsBase64(wav);
       const response = await fetch(env.NEXT_PUBLIC_INFERENCE_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -168,12 +172,16 @@ export default function HomePage() {
       });
 
       if (!response.ok) {
-        throw new Error(`Erreur de l'API (${response.status})`);
+        throw new UserFacingError(apiErrorMessage(response.status));
       }
 
       setVizData((await response.json()) as ApiResponse);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inconnue");
+      setError(
+        err instanceof UserFacingError
+          ? err.message
+          : "Connexion au serveur impossible. Vérifie ta connexion et réessaie.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -409,6 +417,8 @@ export default function HomePage() {
         )}
 
         <footer className="mt-12 text-center font-mono text-[11px] text-zinc-600">
+          Les sons sont analysés à la volée puis oubliés : rien n&apos;est enregistré.
+          <br />
           Inférence sur Modal · PyTorch · Next.js
         </footer>
       </div>

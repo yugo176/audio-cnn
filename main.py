@@ -1,11 +1,13 @@
 import base64
 import io
+import time
 import modal
 import numpy as np
 import requests
 import torch.nn as nn
 import torchaudio.transforms as T
 import torch
+from fastapi import HTTPException, Request
 from pydantic import BaseModel
 import soundfile as sf
 import librosa
@@ -20,6 +22,13 @@ image = (modal.Image.debian_slim()
          .add_local_python_source("model"))
 
 model_volume = modal.Volume.from_name("esc-model")
+
+# Compteurs partagés entre conteneurs pour limiter les abus de l'endpoint public
+rate_limits = modal.Dict.from_name("audio-cnn-rate-limits", create_if_missing=True)
+
+MAX_AUDIO_SECONDS = 10
+MAX_BASE64_CHARS = 8 * 1024 * 1024  # ~6 Mo de fichier audio
+RATE_LIMITS = [(60, 10), (24 * 3600, 150)]  # (fenêtre en s, requêtes max) par IP
 
 
 class AudioProcessor:
@@ -50,7 +59,7 @@ class InferenceRequest(BaseModel):
     audio_data: str
 
 
-@app.cls(image=image, cpu=2.0, memory=4096, volumes={"/models": model_volume}, scaledown_window=15)
+@app.cls(image=image, cpu=2.0, memory=4096, volumes={"/models": model_volume}, scaledown_window=15, max_containers=2)
 class AudioClassifier:
     @modal.enter()
     def load_model(self):
@@ -70,12 +79,40 @@ class AudioClassifier:
         self.audio_processor = AudioProcessor()
         print("Model loaded on enter")
 
-    @modal.fastapi_endpoint(method="POST")
-    def inference(self, request: InferenceRequest):
-        audio_bytes = base64.b64decode(request.audio_data)
+    def check_rate_limit(self, http_request: Request):
+        forwarded = http_request.headers.get("x-forwarded-for", "")
+        ip = forwarded.split(",")[0].strip() or (
+            http_request.client.host if http_request.client else "unknown")
+        now = int(time.time())
+        for window, limit in RATE_LIMITS:
+            key = f"{ip}:{window}:{now // window}"
+            count = rate_limits.get(key, 0) + 1
+            if count > limit:
+                raise HTTPException(
+                    status_code=429, detail="Trop de requêtes, réessaie dans un moment.")
+            rate_limits[key] = count
 
-        audio_data, sample_rate = sf.read(
-            io.BytesIO(audio_bytes), dtype="float32")
+    @modal.fastapi_endpoint(method="POST")
+    def inference(self, request: InferenceRequest, http_request: Request):
+        self.check_rate_limit(http_request)
+
+        if len(request.audio_data) > MAX_BASE64_CHARS:
+            raise HTTPException(
+                status_code=413, detail="Fichier trop volumineux.")
+
+        try:
+            audio_bytes = base64.b64decode(request.audio_data, validate=True)
+            audio_data, sample_rate = sf.read(
+                io.BytesIO(audio_bytes), dtype="float32")
+        except Exception:
+            raise HTTPException(
+                status_code=400, detail="Format audio non reconnu.")
+
+        if len(audio_data) == 0:
+            raise HTTPException(status_code=400, detail="Fichier audio vide.")
+
+        # On coupe avant le rééchantillonnage pour limiter le coût CPU
+        audio_data = audio_data[:int(MAX_AUDIO_SECONDS * sample_rate)]
 
         if audio_data.ndim > 1:
             audio_data = np.mean(audio_data, axis=1)

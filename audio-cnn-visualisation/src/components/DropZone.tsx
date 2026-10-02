@@ -46,7 +46,7 @@ const DropZone = ({
         ref={inputRef}
         id="file-upload"
         type="file"
-        accept=".wav,audio/wav"
+        accept="audio/*,.wav,.mp3,.m4a,.ogg,.flac,.webm"
         className="hidden"
         disabled={isLoading}
         onChange={(e) => {
@@ -69,10 +69,10 @@ const DropZone = ({
             ? "Analyse en cours…"
             : fileName
               ? "Déposer un autre fichier"
-              : "Glisse un fichier WAV ici ou clique pour parcourir"}
+              : "Glisse un fichier audio ici ou clique pour parcourir"}
         </p>
         <p className="mt-1 font-mono text-xs text-zinc-500">
-          {fileName ?? "ESC-50 · 50 classes de sons · clips de 5 s"}
+          {fileName ?? "WAV, MP3, M4A, OGG… · les 10 premières secondes sont analysées"}
         </p>
       </div>
       {isLoading && (
